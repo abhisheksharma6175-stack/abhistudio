@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -17,6 +18,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import { getCart } from "@/lib/cart";
 
 const menuItems = [
   { title: "Home", href: "/" },
@@ -27,6 +29,28 @@ const menuItems = [
 ];
 
 export default function Header() {
+  const [cartCount, setCartCount] = useState(0);
+  const [user, setUser] = useState<{ name: string | null; role: string } | null>(null);
+
+  useEffect(() => {
+    // Load initial count on client mount
+    if (typeof window !== "undefined") {
+      setCartCount(getCart().reduce((total, item) => total + item.quantity, 0));
+    }
+
+    const handleCartUpdate = () => {
+      setCartCount(getCart().reduce((total, item) => total + item.quantity, 0));
+    };
+
+    window.addEventListener("storage", handleCartUpdate);
+    window.addEventListener("cart-updated", handleCartUpdate);
+    fetch("/api/auth/me").then((response) => response.json()).then((data) => setUser(data.user)).catch(() => undefined);
+    return () => {
+      window.removeEventListener("storage", handleCartUpdate);
+      window.removeEventListener("cart-updated", handleCartUpdate);
+    };
+  }, []);
+
   return (
     <AppBar
   position="sticky"
@@ -122,6 +146,8 @@ export default function Header() {
 </IconButton>
 
 <IconButton
+  component={Link}
+  href="/cart"
   sx={{
     color: "#FFD700",
     "&:hover": {
@@ -130,7 +156,7 @@ export default function Header() {
   }}
 >
   <Badge
-    badgeContent={2}
+    badgeContent={cartCount}
     sx={{
       "& .MuiBadge-badge": {
         backgroundColor: "#FFD700",
@@ -141,7 +167,7 @@ export default function Header() {
     <ShoppingBagOutlinedIcon />
   </Badge>
 </IconButton>
-            <Button
+            <Button component={Link} href={user?.role === "ADMIN" ? "/admin" : "/login"}
   variant="contained"
   startIcon={<PersonOutlineOutlinedIcon />}
   sx={{
@@ -161,7 +187,7 @@ export default function Header() {
     },
   }}
 >
-  Login
+  {user?.role === "ADMIN" ? "Admin" : user ? user.name || "Account" : "Login"}
 </Button>
           </Box>
         </Toolbar>
