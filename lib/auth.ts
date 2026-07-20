@@ -8,6 +8,30 @@ const secret = process.env.SESSION_SECRET || "change-this-development-session-se
 
 export type SessionUser = { id: string; name: string | null; email: string; role: "CUSTOMER" | "ADMIN" | "STYLIST" };
 
+function normalizeEmail(value: string) {
+  return value.toLowerCase().trim();
+}
+
+export function getConfiguredAdminEmail() {
+  const configured = process.env.ADMIN_EMAIL?.trim();
+  return configured ? normalizeEmail(configured) : "admin@abhistudio.com";
+}
+
+export function getConfiguredAdminPassword() {
+  return process.env.ADMIN_PASSWORD?.trim() || "AbhiStudio@2026!";
+}
+
+export function isConfiguredAdminCredential(email: string, password: string) {
+  const normalizedEmail = normalizeEmail(email);
+  return normalizedEmail === getConfiguredAdminEmail() && password === getConfiguredAdminPassword();
+}
+
+export function resolveUserRole(email: string, fallback: SessionUser["role"] = "CUSTOMER") {
+  const normalizedEmail = normalizeEmail(email);
+  const configuredAdminEmail = getConfiguredAdminEmail();
+  return configuredAdminEmail && normalizedEmail === configuredAdminEmail ? "ADMIN" : fallback;
+}
+
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const hash = (await scrypt(password, salt, 64)) as Buffer;
