@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, type ComponentType } from "react";
+import { useRouter } from "next/navigation";
 import {
   Alert,
   Box,
@@ -26,6 +27,7 @@ type Order = { id: string; status: string; paymentStatus: string; totalAmount: n
 const blank = { name: "", description: "", price: "", imageUrl: "", stock: "0", duration: "60", categoryId: "" };
 
 export default function AdminPage() {
+  const router = useRouter();
   const [tab, setTab] = useState<number>(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Entity[]>([]);
@@ -52,8 +54,7 @@ export default function AdminPage() {
       ]);
       const session = await meRes.json();
       if (session.user?.role !== "ADMIN") {
-        setError("You need an administrator account to access this page.");
-        setReady(true);
+        router.push("/login");
         return;
       }
       setCategories(await catsRes.json());
@@ -62,8 +63,7 @@ export default function AdminPage() {
       setOrders(await oRes.json());
       setReady(true);
     } catch (err) {
-      setError("Unable to load the administration data.");
-      setReady(true);
+      router.push("/login");
     }
   };
 
@@ -209,7 +209,7 @@ export default function AdminPage() {
             <Box>
               {orders.map((order) => (
                 <Paper key={order.id} sx={{ p: 2, mb: 2 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
                     <Box>
                       <Box sx={{ fontWeight: 700 }}>Order {order.id}</Box>
                       <Box sx={{ color: "#bbb" }}>Placed by {order.user?.email} — ${order.totalAmount.toFixed(2)}</Box>
