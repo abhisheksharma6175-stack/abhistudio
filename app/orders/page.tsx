@@ -38,7 +38,11 @@ export default function OrdersPage() {
         <Stack spacing={3}>
           {orders.map((order) => (
             <Paper key={order.id} sx={{ p: 4, bgcolor: "#1e1e1e", border: "1px solid #2f2f2f" }}>
-              <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems="flex-start" spacing={2}>
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={2}
+                sx={{ justifyContent: "space-between", alignItems: "flex-start" }}
+              >
                 <Box>
                   <Typography variant="h6" sx={{ mb: 1 }}>
                     Order {order.id}
