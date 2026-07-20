@@ -6,6 +6,7 @@ console.log("DB URL:", process.env.DATABASE_URL);
 const globalForMongo = globalThis as typeof globalThis & {
   mongoConnection?: Promise<Db>;
   memoryStore?: Record<string, Record<string, unknown>[]>;
+  mongoIsMemory?: boolean;
 };
 
 type MemoryDocument = Record<string, unknown> & { _id?: unknown };
@@ -120,13 +121,15 @@ export async function connectDB(): Promise<Db> {
     globalForMongo.mongoConnection = (async () => {
       try {
         if (!process.env.DATABASE_URL) {
+          globalForMongo.mongoIsMemory = true;
           return createMemoryDb();
         }
-
         await mongoose.connect(process.env.DATABASE_URL);
+        globalForMongo.mongoIsMemory = false;
         return mongoose.connection.db as Db;
       } catch (error) {
         console.warn("MongoDB unavailable, using in-memory fallback.", error);
+        globalForMongo.mongoIsMemory = true;
         return createMemoryDb();
       }
     })();
@@ -137,11 +140,10 @@ export async function connectDB(): Promise<Db> {
 
 export function objectId(id: string) {
   if (!id) throw new Error("Invalid database id.");
-  if (process.env.DATABASE_URL) {
-    if (!Types.ObjectId.isValid(id)) throw new Error("Invalid database id.");
-    return new Types.ObjectId(id);
-  }
-  return id;
+  // If we're using the in-memory fallback, accept raw ids (they may be strings)
+  if (globalForMongo.mongoIsMemory) return id;
+  if (!Types.ObjectId.isValid(id)) throw new Error("Invalid database id.");
+  return new Types.ObjectId(id);
 }
 
 export function document<T extends Record<string, unknown>>(value: T) {

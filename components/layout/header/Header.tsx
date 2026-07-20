@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import {
   AppBar,
@@ -29,8 +30,39 @@ const menuItems = [
 ];
 
 export default function Header() {
+  const router = useRouter();
   const [cartCount, setCartCount] = useState(0);
   const [user, setUser] = useState<{ name: string | null; role: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch("/api/auth/me");
+      const data = await response.json();
+      setUser(data.user || null);
+    } catch (error) {
+      setUser(null);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        setUser(null);
+        router.push("/");
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Load initial count on client mount
@@ -42,12 +74,21 @@ export default function Header() {
       setCartCount(getCart().reduce((total, item) => total + item.quantity, 0));
     };
 
+    const handleUserUpdate = () => {
+      fetchUser();
+    };
+
     window.addEventListener("storage", handleCartUpdate);
     window.addEventListener("cart-updated", handleCartUpdate);
-    fetch("/api/auth/me").then((response) => response.json()).then((data) => setUser(data.user)).catch(() => undefined);
+    window.addEventListener("user-updated", handleUserUpdate);
+    
+    // Fetch user on mount
+    fetchUser();
+
     return () => {
       window.removeEventListener("storage", handleCartUpdate);
       window.removeEventListener("cart-updated", handleCartUpdate);
+      window.removeEventListener("user-updated", handleUserUpdate);
     };
   }, []);
 
@@ -189,6 +230,30 @@ export default function Header() {
 >
   {user?.role === "ADMIN" ? "Admin" : user ? user.name || "Account" : "Login"}
 </Button>
+
+            {user && (
+              <Button
+                onClick={handleLogout}
+                disabled={loading}
+                variant="outlined"
+                sx={{
+                  ml: 2,
+                  px: 3,
+                  py: 1,
+                  borderRadius: "30px",
+                  borderColor: "#FFD700",
+                  color: "#FFD700",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  "&:hover": {
+                    borderColor: "#E6C200",
+                    backgroundColor: "rgba(255, 215, 0, 0.08)",
+                  },
+                }}
+              >
+                {loading ? "Logging out..." : "Logout"}
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>
