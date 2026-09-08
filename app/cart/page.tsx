@@ -51,7 +51,7 @@ export default function CartPage() {
     }
     update([]); setAddress(""); setMessage("Order placed successfully. Thank you!");
     // redirect to orders (checkout/confirmation) page
-    try { router.push("/orders"); } catch (e) { /* ignore */ }
+    try { router.push("/orders"); } catch { /* ignore */ }
   }
   return <Box sx={{ minHeight: "calc(100vh - 150px)", bgcolor: "#111", py: 7 }}><Container maxWidth="md">
     <Typography variant="h3" sx={{ color: "#fff", fontWeight: 700, mb: 4 }}>Your Cart</Typography>

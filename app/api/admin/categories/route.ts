@@ -27,7 +27,7 @@ export async function PUT(request: Request) {
 		await db.collection("Category").updateOne({ _id: objectId(id) }, { $set: { name: String(name).trim(), updatedAt: new Date() } });
 		const row = await db.collection("Category").findOne({ _id: objectId(id) });
 		return NextResponse.json(document(row));
-	} catch (error) {
+	} catch {
 		return NextResponse.json({ error: "Invalid category id." }, { status: 400 });
 	}
 }
@@ -41,7 +41,7 @@ export async function DELETE(request: Request) {
 		const db = await connectDB();
 		await db.collection("Category").deleteOne({ _id: objectId(id) });
 		return NextResponse.json({ ok: true });
-	} catch (error) {
+	} catch {
 		return NextResponse.json({ error: "Invalid category id." }, { status: 400 });
 	}
 }

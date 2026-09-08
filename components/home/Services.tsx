@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Box, Container, Grid, Typography, Card, CardContent, Button, Chip } from "@mui/material";
+import { Box, Container, Grid, Typography, Card, CardContent, Button } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 interface Service {

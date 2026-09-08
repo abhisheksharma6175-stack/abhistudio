@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     for (const item of items) {
       try {
         ids.push(objectId(item.id));
-      } catch (err) {
+      } catch {
         invalidIds.push(item.id);
       }
     }

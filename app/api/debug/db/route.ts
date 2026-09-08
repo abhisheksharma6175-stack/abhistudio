@@ -12,7 +12,7 @@ export async function GET() {
       // @ts-ignore
       const list = await db.listCollections().toArray();
       collections = list.map((c: any) => c.name || String(c));
-    } catch (e) {
+    } catch {
       // ignore -- memory DB will likely throw
       collections = ["(unable to list collections - possibly in-memory fallback)"];
     }

@@ -41,8 +41,7 @@ export default function OrdersPage() {
               <Stack
                 direction={{ xs: "column", md: "row" }}
                 spacing={2}
-                justifyContent="space-between"
-                alignItems="flex-start"
+                sx={{ justifyContent: "space-between", alignItems: "flex-start" }}
               >
                 <Box>
                   <Typography variant="h6" sx={{ mb: 1 }}>

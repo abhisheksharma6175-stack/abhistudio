@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { Box, Container, Grid, Typography, Button, Rating } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
