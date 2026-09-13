@@ -22,7 +22,16 @@ const Typography = MuiTypography as ComponentType<Record<string, unknown>>;
 
 type Category = { id: string; name: string };
 type Entity = { id: string; name: string; description: string; price: number; imageUrl?: string | null; stock?: number; duration?: number; categoryId: string; category?: Category };
-type Order = { id: string; status: string; paymentStatus: string; totalAmount: number; createdAt: string; user: { name: string | null; email: string }; items: { quantity: number; product: { name: string } }[] };
+type Order = {
+  id: string;
+  status: string;
+  paymentStatus: string;
+  totalAmount: number;
+  createdAt: string;
+  shippingAddress?: string;
+  user: { name: string | null; email: string };
+  items: { quantity: number; product: { name: string } }[];
+};
 
 const blank = { name: "", description: "", price: "", imageUrl: "", stock: "0", duration: "60", categoryId: "" };
 
