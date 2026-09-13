@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       user = await db.collection("User").findOne({ _id: created.insertedId });
     }
 
-    if (!user || !(await verifyPassword(providedPassword, user.password))) {
+    if (!user || !user.password || !(await verifyPassword(providedPassword, user.password))) {
       if (isAdminLogin && user) {
         await db.collection("User").updateOne({ _id: user._id }, { $set: { role: "ADMIN", updatedAt: new Date() } });
         user = await db.collection("User").findOne({ _id: user._id });

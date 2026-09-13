@@ -1,11 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+import { verifyPassword } from "./auth";
 import { getEnvValue, getServerConfig } from "./env";
 
 test("getEnvValue returns fallback in development", () => {
   const value = getEnvValue("SESSION_SECRET", "dev-secret");
   assert.equal(value, "dev-secret");
+});
+
+test("verifyPassword returns false for missing or malformed hashes", async () => {
+  await assert.doesNotReject(async () => {
+    assert.equal(await verifyPassword("abc12345", undefined), false);
+    assert.equal(await verifyPassword("abc12345", "not-a-valid-hash"), false);
+  });
 });
 
 test("getServerConfig is strict in production", () => {

@@ -39,13 +39,21 @@ export async function hashPassword(password: string) {
   return `${salt}:${hash.toString("hex")}`;
 }
 
-export async function verifyPassword(password: string, stored: string) {
+export async function verifyPassword(password: string, stored: string | undefined | null) {
+  if (typeof password !== "string" || !password || typeof stored !== "string" || !stored.trim()) return false;
+
   // Seed data may contain bcrypt hashes; new accounts use Node's built-in scrypt format.
   const [salt, hash] = stored.split(":");
-  if (!salt || !hash) return false;
-  const derived = (await scrypt(password, salt, 64)) as Buffer;
-  const expected = Buffer.from(hash, "hex");
-  return expected.length === derived.length && timingSafeEqual(expected, derived);
+  if (!salt || !hash || !/^[a-fA-F0-9]+$/.test(hash)) return false;
+
+  try {
+    const derived = (await scrypt(password, salt, 64)) as Buffer;
+    const expected = Buffer.from(hash, "hex");
+    if (expected.length !== derived.length) return false;
+    return timingSafeEqual(expected, derived);
+  } catch {
+    return false;
+  }
 }
 
 function sign(value: string) {
