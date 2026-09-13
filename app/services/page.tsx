@@ -22,7 +22,6 @@ import {
   Snackbar,
 } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
 interface Service {
   id: string;

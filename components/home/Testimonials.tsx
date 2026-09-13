@@ -99,7 +99,7 @@ export default function Testimonials() {
                       flexGrow: 1,
                     }}
                   >
-                    "{rev.comment}"
+                    &ldquo;{rev.comment}&rdquo;
                   </Typography>
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: "auto" }}>

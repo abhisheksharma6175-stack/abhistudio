@@ -60,7 +60,7 @@ export default function FeaturedProducts() {
       .catch((err) => console.log("Failed to fetch products, using mock data", err));
   }, []);
 
-  const handleAddToCart = (e: React.MouseEvent, productId: string) => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     // Dispatch cart update event or local storage update
     const currentCount = parseInt(localStorage.getItem("cartCount") || "0") + 1;
@@ -183,7 +183,7 @@ export default function FeaturedProducts() {
                     </Typography>
 
                     <Button
-                      onClick={(e) => handleAddToCart(e, prod.id)}
+                      onClick={handleAddToCart}
                       variant="contained"
                       sx={{
                         bgcolor: "#FFD700",

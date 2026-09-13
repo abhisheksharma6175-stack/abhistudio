@@ -40,7 +40,7 @@ export default function Header() {
       const response = await fetch("/api/auth/me");
       const data = await response.json();
       setUser(data.user || null);
-    } catch (error) {
+    } catch {
       setUser(null);
     }
   };

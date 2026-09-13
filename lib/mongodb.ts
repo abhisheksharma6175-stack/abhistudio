@@ -10,8 +10,6 @@ const globalForMongo = globalThis as typeof globalThis & {
 
 type MemoryDocument = Record<string, unknown> & { _id?: unknown };
 
-type QueryValue = Record<string, unknown> | string | number | boolean | Date | null | undefined;
-
 function normalizeValue(value: unknown) {
   return value instanceof Types.ObjectId ? value.toString() : value;
 }

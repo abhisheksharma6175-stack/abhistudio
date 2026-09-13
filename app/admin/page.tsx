@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import {
   Alert,
@@ -43,7 +43,7 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
       const [meRes, catsRes, pRes, sRes, oRes] = await Promise.all([
         fetch("/api/auth/me"),
@@ -62,14 +62,14 @@ export default function AdminPage() {
       setServices(await sRes.json());
       setOrders(await oRes.json());
       setReady(true);
-    } catch (err) {
+    } catch {
       router.push("/login");
     }
-  };
+  }, [router]);
 
   useEffect(() => {
-    refresh();
-  }, []);
+    void refresh();
+  }, [refresh]);
 
   const change = (key: string, value: string) => setForm((current) => ({ ...current, [key]: value }));
 
