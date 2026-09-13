@@ -1,10 +1,12 @@
 import { createHmac, randomBytes, scrypt as scryptCallback, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { cookies } from "next/headers";
+import { getServerConfig } from "@/lib/env";
 
 const scrypt = promisify(scryptCallback);
 const COOKIE_NAME = "abhi_session";
-const secret = process.env.SESSION_SECRET || "change-this-development-session-secret";
+const { SESSION_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD } = getServerConfig();
+const secret = SESSION_SECRET;
 
 export type SessionUser = { id: string; name: string | null; email: string; role: "CUSTOMER" | "ADMIN" | "STYLIST" };
 
@@ -13,12 +15,11 @@ function normalizeEmail(value: string) {
 }
 
 export function getConfiguredAdminEmail() {
-  const configured = process.env.ADMIN_EMAIL?.trim();
-  return configured ? normalizeEmail(configured) : "admin@abhistudio.com";
+  return normalizeEmail(ADMIN_EMAIL);
 }
 
 export function getConfiguredAdminPassword() {
-  return process.env.ADMIN_PASSWORD?.trim() || "AbhiStudio@2026!";
+  return ADMIN_PASSWORD;
 }
 
 export function isConfiguredAdminCredential(email: string, password: string) {

@@ -1,7 +1,6 @@
 import mongoose, { Types } from "mongoose";
 import type { Db } from "mongodb";
-
-console.log("DB URL:", process.env.DATABASE_URL);
+import { getServerConfig } from "@/lib/env";
 
 const globalForMongo = globalThis as typeof globalThis & {
   mongoConnection?: Promise<Db>;
@@ -117,18 +116,29 @@ function createMemoryDb(): Db {
 }
 
 export async function connectDB(): Promise<Db> {
+  const { NODE_ENV, DATABASE_URL } = getServerConfig();
+
   if (!globalForMongo.mongoConnection) {
     globalForMongo.mongoConnection = (async () => {
-      try {
-        if (!process.env.DATABASE_URL) {
-          globalForMongo.mongoIsMemory = true;
-          return createMemoryDb();
+      if (!DATABASE_URL) {
+        if (NODE_ENV === "production") {
+          throw new Error("DATABASE_URL is required in production.");
         }
-        await mongoose.connect(process.env.DATABASE_URL);
+        console.warn("DATABASE_URL missing; using in-memory fallback for local development.");
+        globalForMongo.mongoIsMemory = true;
+        return createMemoryDb();
+      }
+
+      try {
+        await mongoose.connect(DATABASE_URL);
         globalForMongo.mongoIsMemory = false;
         return mongoose.connection.db as Db;
       } catch (error) {
-        console.warn("MongoDB unavailable, using in-memory fallback.", error);
+        if (NODE_ENV === "production") {
+          throw new Error(error instanceof Error ? error.message : "MongoDB connection failed.");
+        }
+
+        console.warn("MongoDB unavailable, using in-memory fallback for development.", error);
         globalForMongo.mongoIsMemory = true;
         return createMemoryDb();
       }
