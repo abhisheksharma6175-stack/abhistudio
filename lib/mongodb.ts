@@ -76,6 +76,10 @@ function createMemoryDb(): Db {
       return (store[this.name] || []).find((item) => matchesQuery(item, query)) || null;
     }
 
+    async countDocuments(query: Record<string, unknown> = {}) {
+      return (store[this.name] || []).filter((item) => matchesQuery(item, query)).length;
+    }
+
     async insertOne(document: MemoryDocument) {
       const list = store[this.name] || [];
       const id = typeof document._id === "string" || typeof document._id === "number" ? document._id : `mem-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -85,11 +89,29 @@ function createMemoryDb(): Db {
       return { insertedId: id };
     }
 
-    async updateOne(query: Record<string, unknown>, update: { $set?: Record<string, unknown> }) {
+    async insertMany(documents: MemoryDocument[]) {
+      const list = store[this.name] || [];
+      const inserted: MemoryDocument[] = documents.map((document, index) => {
+        const id = typeof document._id === "string" || typeof document._id === "number" ? document._id : `mem-${Date.now()}-${index}-${Math.random().toString(16).slice(2)}`;
+        return { ...document, _id: id } as MemoryDocument;
+      });
+      list.push(...inserted);
+      store[this.name] = list;
+      return { insertedCount: inserted.length, insertedIds: inserted.map((item) => item._id) };
+    }
+
+    async updateOne(query: Record<string, unknown>, update: { $set?: Record<string, unknown>; $inc?: Record<string, unknown> }) {
       const list = store[this.name] || [];
       const target = list.find((item) => matchesQuery(item, query));
       if (!target) return { modifiedCount: 0 };
-      const next = { ...target, ...update.$set, _id: target._id } as MemoryDocument;
+      const next = { ...target } as MemoryDocument;
+      if (update.$set) Object.assign(next, update.$set);
+      if (update.$inc) {
+        for (const [key, value] of Object.entries(update.$inc)) {
+          next[key] = Number(next[key] || 0) + Number(value || 0);
+        }
+      }
+      next._id = target._id;
       const index = list.indexOf(target);
       list[index] = next;
       store[this.name] = list;

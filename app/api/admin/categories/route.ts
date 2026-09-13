@@ -9,12 +9,21 @@ export async function GET() {
 	return NextResponse.json(rows.map(document));
 }
 
+function slugify(value: string) {
+	return String(value || "")
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "") || "item";
+}
+
 export async function POST(request: Request) {
 	const user = await getSession(); if (user?.role !== "ADMIN") return NextResponse.json({ error: "Admin access required." }, { status: 403 });
 	const { name } = await request.json(); if (!name || !String(name).trim()) return NextResponse.json({ error: "Category name is required." }, { status: 400 });
 	const db = await connectDB();
 	const now = new Date();
-	const result = await db.collection("Category").insertOne({ name: String(name).trim(), createdAt: now, updatedAt: now });
+	const cleanedName = String(name).trim();
+	const result = await db.collection("Category").insertOne({ name: cleanedName, slug: slugify(cleanedName), createdAt: now, updatedAt: now });
 	const row = await db.collection("Category").findOne({ _id: result.insertedId });
 	return NextResponse.json(document(row), { status: 201 });
 }
@@ -24,7 +33,8 @@ export async function PUT(request: Request) {
 	const { id, name } = await request.json(); if (!id) return NextResponse.json({ error: "Category id is required." }, { status: 400 }); if (!name || !String(name).trim()) return NextResponse.json({ error: "Category name is required." }, { status: 400 });
 	try {
 		const db = await connectDB();
-		await db.collection("Category").updateOne({ _id: objectId(id) }, { $set: { name: String(name).trim(), updatedAt: new Date() } });
+		const cleanedName = String(name).trim();
+		await db.collection("Category").updateOne({ _id: objectId(id) }, { $set: { name: cleanedName, slug: slugify(cleanedName), updatedAt: new Date() } });
 		const row = await db.collection("Category").findOne({ _id: objectId(id) });
 		return NextResponse.json(document(row));
 	} catch {

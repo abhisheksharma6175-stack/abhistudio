@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from "next/server";
 import { connectDB, document } from "@/lib/mongodb";
+import { ensureCatalogSeed } from "@/lib/catalogSeed";
 
 export async function GET(request: Request) {
   try {
@@ -8,6 +9,8 @@ export async function GET(request: Request) {
     const categorySlug = searchParams.get("category");
 
     const db = await connectDB();
+    await ensureCatalogSeed();
+
     const categoryFilter = categorySlug ? await db.collection("Category").findOne({ slug: categorySlug }) : null;
     const rows = await db.collection("Product").find(categoryFilter ? { categoryId: categoryFilter._id } : {}).toArray();
     const categoryIds = rows.map((row) => row.categoryId).filter(Boolean);

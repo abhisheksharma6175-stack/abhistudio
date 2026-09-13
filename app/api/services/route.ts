@@ -1,10 +1,13 @@
 // @ts-nocheck
 import { NextResponse } from "next/server";
 import { connectDB, document } from "@/lib/mongodb";
+import { ensureCatalogSeed } from "@/lib/catalogSeed";
 
 export async function GET() {
   try {
     const db = await connectDB();
+    await ensureCatalogSeed();
+
     const rows = await db.collection("Service").find({}).toArray();
     const categories = await db.collection("Category").find({ _id: { $in: rows.map((row) => row.categoryId).filter(Boolean) } }).toArray();
     const services = rows.map((row) => ({

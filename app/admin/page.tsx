@@ -125,8 +125,12 @@ export default function AdminPage() {
     setCategoryForm({ name: cat.name });
   }
 
-  async function updateOrder(id: string, status: string) {
-    await fetch("/api/admin/orders", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, status }) });
+  async function updateOrder(id: string, status: string, paymentStatus?: string) {
+    await fetch("/api/admin/orders", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status, paymentStatus }),
+    });
     refresh();
   }
 
@@ -209,14 +213,29 @@ export default function AdminPage() {
             <Box>
               {orders.map((order) => (
                 <Paper key={order.id} sx={{ p: 2, mb: 2 }}>
-                  <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+                  <Stack direction={{ xs: "column", md: "row" }} sx={{ justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" }, gap: 2 }}>
                     <Box>
                       <Box sx={{ fontWeight: 700 }}>Order {order.id}</Box>
-                      <Box sx={{ color: "#bbb" }}>Placed by {order.user?.email} — ${order.totalAmount.toFixed(2)}</Box>
+                      <Box sx={{ color: "#bbb" }}>Placed by {order.user?.email || "Unknown user"}</Box>
+                      <Box sx={{ color: "#bbb" }}>Address: {order.shippingAddress || "No address supplied"}</Box>
+                      <Box sx={{ color: "#bbb" }}>Total: ${Number(order.totalAmount || 0).toFixed(2)}</Box>
                     </Box>
-                    <Box>
-                      <Button onClick={() => updateOrder(order.id, order.status === "PENDING" ? "COMPLETED" : "PENDING")} sx={{ mr: 1 }}>{order.status === "PENDING" ? "Mark completed" : "Mark pending"}</Button>
-                    </Box>
+                    <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+                      <Button
+                        onClick={() => updateOrder(order.id, order.status === "PENDING" ? "COMPLETED" : "PENDING", order.paymentStatus)}
+                        variant="contained"
+                        sx={{ bgcolor: "#FFD700", color: "#000" }}
+                      >
+                        {order.status === "PENDING" ? "Mark completed" : "Mark pending"}
+                      </Button>
+                      <Button
+                        onClick={() => updateOrder(order.id, order.status, order.paymentStatus === "PENDING" ? "PAID" : "PENDING")}
+                        variant="outlined"
+                        sx={{ color: "#000", borderColor: "#444" }}
+                      >
+                        {order.paymentStatus === "PENDING" ? "Mark paid" : "Mark pending payment"}
+                      </Button>
+                    </Stack>
                   </Stack>
                 </Paper>
               ))}

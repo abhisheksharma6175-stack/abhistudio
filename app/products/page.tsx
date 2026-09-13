@@ -55,7 +55,13 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetch("/api/products")
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok || !Array.isArray(data)) {
+          throw new Error(data?.error || "Invalid product response");
+        }
+        return data;
+      })
       .then((data) => {
         setProducts(data);
         setFilteredProducts(data);
@@ -63,6 +69,8 @@ export default function ProductsPage() {
       })
       .catch((err) => {
         console.error("Failed to load products:", err);
+        setProducts([]);
+        setFilteredProducts([]);
         setLoading(false);
       });
   }, []);

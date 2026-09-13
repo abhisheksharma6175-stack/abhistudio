@@ -70,12 +70,17 @@ function ServicesContent() {
 
   useEffect(() => {
     fetch("/api/services")
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok || !Array.isArray(data)) {
+          throw new Error(data?.error || "Invalid service response");
+        }
+        return data;
+      })
       .then((data) => {
         setServices(data);
         setLoading(false);
-        
-        // If a ?book=ID query parameter is present, automatically open the modal for that service
+
         if (bookQueryParam) {
           const serviceToBook = data.find((s: Service) => s.id === bookQueryParam);
           if (serviceToBook) {
@@ -86,6 +91,7 @@ function ServicesContent() {
       })
       .catch((err) => {
         console.error("Failed to fetch services:", err);
+        setServices([]);
         setLoading(false);
       });
   }, [bookQueryParam]);

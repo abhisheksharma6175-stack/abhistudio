@@ -18,13 +18,26 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
       color: "#fff",
+      backgroundColor: "transparent",
       "& fieldset": { borderColor: "#444" },
       "&:hover fieldset": { borderColor: "#777" },
       "&.Mui-focused fieldset": { borderColor: "#FFD700" },
-      "& input:-webkit-autofill": {
-        WebkitBoxShadow: "0 0 0 100px #1b1b1b inset",
-        WebkitTextFillColor: "#fff",
+      "& input": {
+        backgroundColor: "transparent !important",
+        WebkitBoxShadow: "0 0 0 1000px transparent inset !important",
+        WebkitTextFillColor: "#fff !important",
         caretColor: "#fff",
+      },
+      "& input:-webkit-autofill": {
+        WebkitBoxShadow: "0 0 0 1000px transparent inset !important",
+        WebkitTextFillColor: "#fff !important",
+        backgroundColor: "transparent !important",
+        caretColor: "#fff",
+      },
+      "& input:-webkit-autofill:hover, & input:-webkit-autofill:focus, & input:-webkit-autofill:active": {
+        WebkitBoxShadow: "0 0 0 1000px transparent inset !important",
+        WebkitTextFillColor: "#fff !important",
+        backgroundColor: "transparent !important",
       },
     },
     "& .MuiFormHelperText-root": { color: "#a0a0a0" },
